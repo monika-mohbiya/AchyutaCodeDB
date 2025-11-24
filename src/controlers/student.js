@@ -1,19 +1,19 @@
-import con from "../controlers/dbconnection.js";
+import con from "../controlers/dbconnection.js"; // Promise pool
 
-export const getStudents = (req, res) => {
-    const query = 'SELECT * FROM students';
-    con.query(query, (err, result) => {
-        if (err) {
-            console.log(err);
-            res.status(500).send("Error fetching data");
-        } else {
-            res.send(result);
-        }
-    });
+// Get all students
+export const getStudents = async (req, res) => {
+    try {
+        const [result] = await con.query('SELECT * FROM students');
+        res.json(result);
+    } catch (err) {
+        console.error("DB Error:", err.message);
+        res.status(500).send("Error fetching data");
+    }
 };
 
-export const getStudentByfilter = (req, res) => {
-    const searchValue = req.params.search;  // ✅ issi ko value milti hai
+// Get students by filter
+export const getStudentByfilter = async (req, res) => {
+    const searchValue = req.params.search;
     console.log("SEARCH VALUE =", searchValue);
 
     const sql = `
@@ -26,25 +26,11 @@ export const getStudentByfilter = (req, res) => {
 
     const search = `%${searchValue}%`;
 
-    con.query(sql, [search, search, search, search], (err, result) => {
-        if (err) return res.status(500).json({ error: err });
-
-        // ✅ Always return array (never 404)
-        return res.json(result);
-    });
+    try {
+        const [result] = await con.query(sql, [search, search, search, search]);
+        res.json(result);
+    } catch (err) {
+        console.error("DB Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

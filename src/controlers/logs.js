@@ -1,5 +1,6 @@
-import con from "../controlers/dbconnection.js";
-export const getEndpointHitDetails = (req, res) => {
+import con from "../controlers/dbconnection.js"; // Promise pool
+
+export const getEndpointHitDetails = async (req, res) => {
     const sql = `
         SELECT 
             endpoint,
@@ -10,8 +11,11 @@ export const getEndpointHitDetails = (req, res) => {
         ORDER BY hits DESC
     `;
 
-    con.query(sql, (err, rows) => {
-        if (err) return res.status(500).json({ error: err });
+    try {
+        const [rows] = await con.query(sql);
         res.json(rows);
-    });
+    } catch (err) {
+        console.error("DB Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
 };

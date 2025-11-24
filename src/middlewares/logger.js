@@ -1,28 +1,17 @@
-// import con from "../controlers/dbconnection.js";
-
-// export const apiLogger = (req, res, next) => {
-//     const endpoint = req.originalUrl;
-//     const sql = "INSERT INTO api_logs (endpoint, hit_time) VALUES (?, NOW())";
-
-//     con.query(sql, [endpoint], (err) => {
-//         if (err) console.log("Log Error:", err);
-//     });
-
-//     next();
-// };
-// export default apiLogger;
-
 import con from "../controlers/dbconnection.js";
 
-export const apiLogger = (req, res, next) => {
+// API Logger middleware
+export const apiLogger = async (req, res, next) => {
     const endpoint = req.originalUrl;
     const method = req.method;
 
-    const sql = "INSERT INTO api_logs (endpoint, method) VALUES (?, ?)";
+    const sql = "INSERT INTO api_logs (endpoint, method, hit_time) VALUES (?, ?, NOW())";
 
-    con.query(sql, [endpoint, method], (err) => {
-        if (err) console.log("Log Error:", err);
-    });
+    try {
+        await con.query(sql, [endpoint, method]);
+    } catch (err) {
+        console.error("Log Error:", err.message);
+    }
 
     next();
 };
